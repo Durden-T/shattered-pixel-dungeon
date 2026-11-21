@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Cheats;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -180,6 +181,7 @@ abstract public class Weapon extends KindOfWeapon {
 		//do not progress toward ID in the specific case of a missile weapon with no parent using
 		// up it's last shot, as in this case there's nothing left to ID anyway
 		if (this instanceof MissileWeapon
+				&& attacker.buff(Cheats.InfiniteDurability.class) == null
 				&& ((MissileWeapon) this).durabilityLeft() <= ((MissileWeapon) this).durabilityPerUse()
 				&& ((MissileWeapon) this).parent == null){
 			return damage;

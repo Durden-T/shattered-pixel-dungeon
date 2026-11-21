@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Cheats;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -60,7 +61,7 @@ public class Crystal extends Weapon.Enchantment {
 		if (attacker == Dungeon.hero || attacker instanceof DriedRose.GhostHero) {
 			if (weapon instanceof MissileWeapon) {
 				setThrownWep(); //we piggyback on thrown weapon durability, don't change our own
-			} else {
+			} else if (attacker.buff(Cheats.InfiniteDurability.class) == null) {
 				thrownWeapon = false;
 				//lasts for an average of 50 attacks at normal speed at +0...
 				float avgUses = 50;

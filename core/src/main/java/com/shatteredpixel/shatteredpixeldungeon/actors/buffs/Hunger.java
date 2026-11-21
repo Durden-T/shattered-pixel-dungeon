@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Cheats;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
@@ -60,10 +61,20 @@ public class Hunger extends Buff implements Hero.Doom {
 		partialDamage = bundle.getFloat(PARTIALDAMAGE);
 	}
 
+	private boolean keepSated() {
+		if (target.buff(Cheats.NoHunger.class) == null) return false;
+		if (level != 0) {
+			level = 0;
+			BuffIndicator.refreshHero();
+		}
+		partialDamage = 0;
+		return true;
+	}
+
 	@Override
 	public boolean act() {
 
-		if (Dungeon.level.locked
+		if (keepSated() || Dungeon.level.locked
 				|| target.buff(WellFed.class) != null
 				|| SPDSettings.intro()
 				|| target.buff(ScrollOfChallenge.ChallengeArena.class) != null){
@@ -135,6 +146,7 @@ public class Hunger extends Buff implements Hero.Doom {
 
 	public void affectHunger(float energy, boolean overrideLimits ) {
 
+		if (keepSated()) return;
 		if (energy < 0 && target.buff(WellFed.class) != null){
 			target.buff(WellFed.class).left += energy;
 			BuffIndicator.refreshHero();

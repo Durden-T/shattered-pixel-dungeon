@@ -835,7 +835,8 @@ public class Hero extends Char {
 	
 	@Override
 	public boolean act() {
-		
+		Cheats.refreshTurn(this);
+
 		//calls to dungeon.observe will also update hero's local FOV.
 		fieldOfView = Dungeon.level.heroFOV;
 
@@ -2169,6 +2170,10 @@ public class Hero extends Char {
 
 	@Override
 	public void die( Object cause ) {
+		if (buff(Cheats.GodMode.class) != null) {
+			HP = Math.max(HP, 1);
+			return;
+		}
 		
 		curAction = null;
 

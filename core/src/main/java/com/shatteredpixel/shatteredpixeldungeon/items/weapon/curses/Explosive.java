@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Cheats;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -87,7 +88,7 @@ public class Explosive extends Weapon.Enchantment {
 			durability += 100;
 			Item.updateQuickslot();
 
-			if (weapon instanceof MissileWeapon){
+			if (weapon instanceof MissileWeapon && attacker.buff(Cheats.InfiniteDurability.class) == null){
 				//the explosion damages thrown weapons
 				((MissileWeapon) weapon).damage(9*((MissileWeapon) weapon).durabilityPerUse());
 			}

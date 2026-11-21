@@ -244,6 +244,15 @@ public class Berserk extends ShieldBuff implements ActionIndicator.Action {
 		}
 	}
 
+	public void clearRecovery() {
+		if (state == State.RECOVERING) {
+			state = State.NORMAL;
+			levelRecovery = 0;
+			turnRecovery = 0;
+			BuffIndicator.refreshHero();
+		}
+	}
+
 	public void recover(float percent){
 		if (state == State.RECOVERING && levelRecovery > 0){
 			levelRecovery -= percent;

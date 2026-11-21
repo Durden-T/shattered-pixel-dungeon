@@ -74,6 +74,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vulnerable;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Weakness;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Cheats;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -970,7 +971,11 @@ public abstract class Char extends Actor {
 			bleedAmt = 0;
 		}
 
-		if (bleedAmt > 0){
+		if (dmg > 0 && Dungeon.hero != null && this != Dungeon.hero && alignment == Alignment.ENEMY
+				&& Dungeon.hero.buff(Cheats.OneHitKill.class) != null
+				&& !Char.hasProp(this, Property.BOSS) && !Char.hasProp(this, Property.MINIBOSS)) {
+			dmg = Math.max(dmg, HP + shielding());
+		} else if (bleedAmt > 0){
 			Bleeding b = buff(Bleeding.class);
 			if (b == null){
 				b = new Bleeding();
@@ -1400,7 +1405,8 @@ public abstract class Char extends Actor {
 	//similar to isImmune, but only factors in damage.
 	//Is used in AI decision-making
 	public boolean isInvulnerable( Class effect ){
-		return buff(Challenge.SpectatorFreeze.class) != null || buff(Invulnerability.class) != null;
+		return buff(Challenge.SpectatorFreeze.class) != null || buff(Invulnerability.class) != null
+				|| buff(Cheats.GodMode.class) != null;
 	}
 
 	protected HashSet<Property> properties = new HashSet<>();

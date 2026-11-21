@@ -92,6 +92,10 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 		return true;
 	}
 	
+	public void clearCooldown() {
+		freerunCooldown = 0;
+	}
+
 	public void gainStack(){
 		movedLastTurn = true;
 		if (freerunCooldown <= 0 && !freerunning()){
@@ -126,7 +130,7 @@ public class Momentum extends Buff implements ActionIndicator.Action {
 	
 	@Override
 	public int icon() {
-		if (momentumStacks > 0 || freerunCooldown > 0)  return BuffIndicator.MOMENTUM;
+		if (freerunning() || momentumStacks > 0 || freerunCooldown > 0) return BuffIndicator.MOMENTUM;
 		else                                            return BuffIndicator.NONE;
 	}
 	

@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Cheats;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -235,7 +236,8 @@ abstract public class MissileWeapon extends Weapon {
 	@Override
 	public void doThrow(Hero hero) {
 		parent = null; //reset parent before throwing, just in case
-		if (((levelKnown && level() > 0) || hasGoodEnchant() || masteryPotionBonus || enchantHardened)
+		if (hero.buff(Cheats.InfiniteDurability.class) == null
+				&& ((levelKnown && level() > 0) || hasGoodEnchant() || masteryPotionBonus || enchantHardened)
 				&& !extraThrownLeft && quantity() == 1 && durabilityLeft() <= durabilityPerUse()){
 			GameScene.show(new WndOptions(new ItemSprite(this), Messages.titleCase(title()),
 					Messages.get(MissileWeapon.class, "break_upgraded_warn_desc"),
@@ -503,7 +505,16 @@ abstract public class MissileWeapon extends Weapon {
 		return super.enchant(ench);
 	}
 
+	private static boolean infiniteDurability() {
+		return Dungeon.hero != null && Dungeon.hero.buff(Cheats.InfiniteDurability.class) != null;
+	}
+
 	protected void decrementDurability(){
+		if (infiniteDurability()) {
+			durabilityPerUse();
+			parent = null;
+			return;
+		}
 		//if this weapon was thrown from a source stack, degrade that stack.
 		//unless a weapon is about to break, then break the one being thrown
 		if (parent != null){
