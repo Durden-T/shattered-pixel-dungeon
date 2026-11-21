@@ -355,6 +355,10 @@ public class BrokenSeal extends Item {
 			return cooldown > 0;
 		}
 
+		public void clearCooldown() {
+			if (cooldown > 0) cooldown = 0;
+		}
+
 		public void reduceCooldown(float percentage){
 			cooldown -= Math.round(COOLDOWN_START*percentage);
 			cooldown = Math.max(cooldown, -COOLDOWN_START);

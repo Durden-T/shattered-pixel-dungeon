@@ -106,6 +106,11 @@ public class Messages {
 				bundles.add(I18NBundle.createBundle(Gdx.files.internal(file), bundleLocal));
 			}
 		}
+		if (bundleLocal.getLanguage().equals("id")) {
+			for (String file : prop_files) {
+				bundles.add(I18NBundle.createBundle(Gdx.files.internal(file), Locale.ROOT));
+			}
+		}
 	}
 
 

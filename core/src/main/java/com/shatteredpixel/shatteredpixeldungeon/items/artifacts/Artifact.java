@@ -250,6 +250,19 @@ public class Artifact extends KindofMisc {
 		//do nothing by default;
 	}
 
+	public void refillCharge() {
+		int cap = refillChargeCap();
+		if (cap > 0 && charge < cap) {
+			charge = cap;
+			partialCharge = 0;
+			updateQuickslot();
+		}
+	}
+
+	protected int refillChargeCap() {
+		return chargeCap;
+	}
+
 	public class ArtifactBuff extends Buff {
 
 		@Override

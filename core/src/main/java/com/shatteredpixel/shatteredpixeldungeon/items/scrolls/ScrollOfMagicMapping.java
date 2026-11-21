@@ -43,6 +43,17 @@ public class ScrollOfMagicMapping extends Scroll {
 	public void doRead() {
 
 		detach(curUser.belongings.backpack);
+		revealMap();
+
+		SpellSprite.show( curUser, SpellSprite.MAP );
+		Sample.INSTANCE.play( Assets.Sounds.READ );
+
+		identify();
+
+		readAnimation();
+	}
+
+	public static void revealMap() {
 		int length = Dungeon.level.length();
 		int[] map = Dungeon.level.map;
 		boolean[] mapped = Dungeon.level.mapped;
@@ -72,17 +83,10 @@ public class ScrollOfMagicMapping extends Scroll {
 		}
 		GameScene.updateFog();
 		
-		GLog.i( Messages.get(this, "layout") );
+		GLog.i( Messages.get(ScrollOfMagicMapping.class, "layout") );
 		if (noticed) {
 			Sample.INSTANCE.play( Assets.Sounds.SECRET );
 		}
-		
-		SpellSprite.show( curUser, SpellSprite.MAP );
-		Sample.INSTANCE.play( Assets.Sounds.READ );
-
-		identify();
-
-		readAnimation();
 	}
 	
 	@Override
