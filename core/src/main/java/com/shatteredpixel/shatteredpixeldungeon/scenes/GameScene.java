@@ -400,7 +400,7 @@ public class GameScene extends PixelScene {
 		int uiSize = SPDSettings.interfaceSize();
 
 		//display cutouts can obstruct various UI elements, so we need to adjust for that sometimes
-		float heroPaneExtraWidth = insets.left;
+		float heroPaneExtraWidth = 0;
 		float menuBarMaxLeft = uiCamera.width-insets.right-MenuPane.WIDTH;
 		int hpBarMaxWidth = 50; //default max width
 		float[] buffBarRowLimits = new float[9];
@@ -410,11 +410,13 @@ public class GameScene extends PixelScene {
 				//smaller non-notch cutouts are of varying size and may obstruct various UI elements
 				// some are small hole punches, some are huge dynamic islands
 				RectF cutout = Game.platform.getDisplayCutout().scale(1f / defaultZoom);
+				float cutoutLeftInPane = cutout.left - insets.left;
+				float cutoutRightInPane = cutout.right - insets.left;
 				//if the cutout is positioned to obstruct the hero portrait in the status pane
 				if (cutout.top < 30
-						&& cutout.left < 20
-						&& cutout.right > 12) {
-					heroPaneExtraWidth = Math.max(heroPaneExtraWidth, cutout.right-12);
+						&& cutoutLeftInPane < 20
+						&& cutoutRightInPane > 12) {
+					heroPaneExtraWidth = cutoutRightInPane - 12;
 					//make sure we have space to actually move it though
 					heroPaneExtraWidth = Math.min(heroPaneExtraWidth, uiCamera.width - PixelScene.MIN_WIDTH_P);
 				}
@@ -427,17 +429,17 @@ public class GameScene extends PixelScene {
 					menuBarMaxLeft = Math.max(menuBarMaxLeft, PixelScene.MIN_WIDTH_P-MenuPane.WIDTH);
 				}
 				//if the cutout is positioned to obstruct the HP bar
-				else if (cutout.left < 78
+				else if (cutoutLeftInPane < 78
 						&& cutout.top < 4
-						&& cutout.right > 32) {
+						&& cutoutRightInPane > 32) {
 					//subtract starting position, but add a bit back due to end of bar
-					hpBarMaxWidth = Math.round(cutout.left - 32 + 4);
+					hpBarMaxWidth = Math.round(cutoutLeftInPane - 32 + 4);
 					hpBarMaxWidth = Math.max(hpBarMaxWidth, 21); //cannot go below 21 (30 effective)
 				}
 				//if the cutout is positioned to obstruct the buff bar
-				if (cutout.left < 84
+				if (cutoutLeftInPane < 84
 						&& cutout.top < 10
-						&& cutout.right > 32
+						&& cutoutRightInPane > 32
 						&& cutout.bottom > 11) {
 					int i = 1;
 					int rowTop = 11;
@@ -445,7 +447,7 @@ public class GameScene extends PixelScene {
 					while (cutout.bottom > rowTop){
 						if (i == 1 || cutout.bottom > rowTop+2 ) { //always shorten first row
 							//subtract starting position, add a bit back to allow slight overlap
-							buffBarRowLimits[i] = cutout.left - 32 + 3;
+							buffBarRowLimits[i] = cutoutLeftInPane - 32 + 3;
 						} else {
 							//if row is only slightly cut off, lower it instead of limiting width
 							buffBarRowAdjusts[i] = cutout.bottom - rowTop + 1;
@@ -1456,13 +1458,7 @@ public class GameScene extends PixelScene {
 	}
 
 	public static boolean showingWindow(){
-		if (scene == null) return false;
-
-		for (Gizmo g : scene.members){
-			if (g instanceof Window) return true;
-		}
-
-		return false;
+		return scene != null && scene.hasOpenWindow();
 	}
 
 	public static boolean interfaceBlockingHero(){

@@ -281,6 +281,14 @@ public class PixelScene extends Scene {
 		}
 	}
 
+	public synchronized boolean hasOpenWindow(){
+		if (members == null) return false;
+		for (Gizmo member : members) {
+			if (member instanceof Window) return true;
+		}
+		return false;
+	}
+
 	//this system only preserves windows with a public zero-arg constructor
 	private static ArrayList<Class<?extends Window>> savedWindows = new ArrayList<>();
 	private static Class<?extends PixelScene> savedClass = null;

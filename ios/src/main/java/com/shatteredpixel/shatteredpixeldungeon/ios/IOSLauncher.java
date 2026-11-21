@@ -23,15 +23,16 @@ package com.shatteredpixel.shatteredpixeldungeon.ios;
 
 import com.badlogic.gdx.Files;
 import com.badlogic.gdx.backends.iosrobovm.DefaultIOSInput;
-import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;
 import com.badlogic.gdx.backends.iosrobovm.IOSInput;
 import com.badlogic.gdx.backends.iosrobovm.IOSPreferences;
+import com.badlogic.gdx.backends.iosrobovm.SceneIOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.bindings.metalangle.MGLDrawableColorFormat;
 import com.badlogic.gdx.backends.iosrobovm.bindings.metalangle.MGLDrawableDepthFormat;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.News;
 import com.shatteredpixel.shatteredpixeldungeon.services.news.NewsImpl;
 import com.shatteredpixel.shatteredpixeldungeon.services.updates.UpdateImpl;
@@ -46,14 +47,13 @@ import org.robovm.apple.foundation.NSMutableDictionary;
 import org.robovm.apple.foundation.NSObject;
 import org.robovm.apple.foundation.NSString;
 import org.robovm.apple.uikit.UIApplication;
-import org.robovm.apple.uikit.UIInterfaceOrientation;
 import org.robovm.apple.uikit.UITextField;
 
 import java.io.File;
 
-public class IOSLauncher extends IOSApplication.Delegate {
+public class IOSLauncher extends SceneIOSApplication.Delegate {
 	@Override
-	protected IOSApplication createApplication() {
+	protected SceneIOSApplication createApplication() {
 
 		//ensures the app actually crashes if there's an error in the mobiVM runtime
 		NSException.registerDefaultJavaUncaughtExceptionHandler();
@@ -137,6 +137,7 @@ public class IOSLauncher extends IOSApplication.Delegate {
 		config.addIosDevice("IPHONE_17_PRO_MAX",    "iPhone18,2", 460);
 		config.addIosDevice("IPHONE_17",            "iPhone18,3", 460);
 		config.addIosDevice("IPHONE_AIR",           "iPhone18,4", 460);
+		config.addIosDevice("IPHONE_DUO",           IOSPlatformSupport.IPHONE_DUO, 460);
 
 		config.addIosDevice("IPAD_7G_WIFI",                 "iPad7,11", 264);
 		config.addIosDevice("IPAD_7G_WIFI_CELLULAR",        "iPad7,12", 264);
@@ -188,7 +189,13 @@ public class IOSLauncher extends IOSApplication.Delegate {
 		config.addIosDevice("SIMULATOR_64",     "x86_64", 460);
 		config.addIosDevice("SIMULATOR_ARM64",  "arm64", 460);
 
-		return new IOSApplication(new ShatteredPixelDungeon(new IOSPlatformSupport()), config){
+		IOSGame game = new IOSGame();
+		return new SceneIOSApplication(game, config){
+			@Override
+			protected void displayInsetsChanged() {
+				game.insetsChanged = true;
+			}
+
 			@Override
 			protected IOSInput createInput() {
 				//FIXME essentially a backport of a fix to text fields from libGDX ios backend 1.13.5
@@ -206,10 +213,25 @@ public class IOSLauncher extends IOSApplication.Delegate {
 		};
 	}
 
-	@Override
-	public void didChangStatusBarOrientation(UIApplication application, UIInterfaceOrientation oldStatusBarOrientation) {
-		super.didChangStatusBarOrientation(application, oldStatusBarOrientation);
-		ShatteredPixelDungeon.seamlessResetScene();
+	private static final class IOSGame extends ShatteredPixelDungeon {
+		private boolean insetsChanged;
+
+		private IOSGame() {
+			super(new IOSPlatformSupport());
+		}
+
+		@Override
+		public void render() {
+			if (insetsChanged) {
+				if (switchingScene() || scene() == null) {
+					insetsChanged = false;
+				} else if (scene() instanceof PixelScene && !((PixelScene) scene()).hasOpenWindow()) {
+					insetsChanged = false;
+					seamlessResetScene();
+				}
+			}
+			super.render();
+		}
 	}
 
 	public static void main(String[] argv) {

@@ -488,10 +488,13 @@ public class Toolbar extends Component {
 	protected void layout() {
 
 		float right = width;
+		float left = x;
 
+		float availableWidth = right - left;
+		float toolbarEndsWidth = btnWait.width() + btnSearch.width() + btnInventory.width() + 19 + 20;
 		int quickslotsToShow = 4;
-		if (PixelScene.uiCamera.width > 152) quickslotsToShow ++;
-		if (PixelScene.uiCamera.width > 170) quickslotsToShow ++;
+		if (availableWidth >= toolbarEndsWidth + 3 * 18) quickslotsToShow++;
+		if (availableWidth >= toolbarEndsWidth + 4 * 18) quickslotsToShow++;
 
 		int startingSlot;
 		if (SPDSettings.quickSwapper() && quickslotsToShow < 6){
@@ -572,8 +575,6 @@ public class Toolbar extends Component {
 
 				btnInventory.setPos(right - btnInventory.width(), y);
 
-				float left = 0;
-
 				btnQuick[startingSlot].setPos(btnInventory.left() - btnQuick[startingSlot].width(), y + 2);
 				for (int i = startingSlot+1; i <= endingSlot; i++) {
 					btnQuick[i].setPos(btnQuick[i-1].left() - btnQuick[i].width(), y + 2);
@@ -594,7 +595,7 @@ public class Toolbar extends Component {
 					if (slot.visible) toolbarWidth += slot.width();
 				}
 				if (btnSwap.visible) toolbarWidth += btnSwap.width()-2;
-				right = (width + toolbarWidth)/2;
+				right = Math.min(right, (left + right + toolbarWidth)/2);
 
 			case GROUP:
 				btnWait.setPos(right - btnWait.width(), y);
@@ -604,12 +605,12 @@ public class Toolbar extends Component {
 				btnQuick[startingSlot].setPos(btnInventory.left() - btnQuick[startingSlot].width(), y + 2);
 				for (int i = startingSlot+1; i <= endingSlot; i++) {
 					btnQuick[i].setPos(btnQuick[i-1].left() - btnQuick[i].width(), y + 2);
-					shift = -btnQuick[i].left();
+					shift = left - btnQuick[i].left();
 				}
 
 				if (btnSwap.visible){
 					btnSwap.setPos(btnQuick[endingSlot].left() - (btnSwap.width()-2), y+3);
-					shift = -btnSwap.left();
+					shift = left - btnSwap.left();
 				}
 				
 				break;
@@ -625,20 +626,18 @@ public class Toolbar extends Component {
 			}
 		}
 
-		right = width;
-
 		if (SPDSettings.flipToolbar()) {
-
-			btnWait.setPos( (right - btnWait.right()), y);
-			btnSearch.setPos( (right - btnSearch.right()), y);
-			btnInventory.setPos( (right - btnInventory.right()), y);
+			float mirror = left + width;
+			btnWait.setPos(mirror - btnWait.right(), y);
+			btnSearch.setPos(mirror - btnSearch.right(), y);
+			btnInventory.setPos(mirror - btnInventory.right(), y);
 
 			for(int i = startingSlot; i <= endingSlot; i++) {
-				btnQuick[i].setPos( right - btnQuick[i].right(), y+2);
+				btnQuick[i].setPos(mirror - btnQuick[i].right(), y+2);
 			}
 
 			if (btnSwap.visible){
-				btnSwap.setPos( right - btnSwap.right(), y+3);
+				btnSwap.setPos(mirror - btnSwap.right(), y+3);
 			}
 
 		}

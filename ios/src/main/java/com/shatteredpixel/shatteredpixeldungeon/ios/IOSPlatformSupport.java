@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.ios;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.iosrobovm.DefaultIOSInput;
+import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.custom.HWMachine;
 import com.badlogic.gdx.backends.iosrobovm.objectal.OALSimpleAudio;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -38,17 +39,21 @@ import com.watabou.utils.RectF;
 import org.robovm.apple.audiotoolbox.AudioServices;
 import org.robovm.apple.systemconfiguration.SCNetworkReachability;
 import org.robovm.apple.systemconfiguration.SCNetworkReachabilityFlags;
-import org.robovm.apple.uikit.UIApplication;
 import org.robovm.apple.uikit.UIInterfaceOrientation;
+import org.robovm.apple.uikit.UIWindowScene;
+
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class IOSPlatformSupport extends PlatformSupport {
 
+	static final String IPHONE_DUO = "iPhone19,4";
+	private final boolean iPhoneDuo = IPHONE_DUO.equals(HWMachine.getMachineString())
+			|| IPHONE_DUO.equals(System.getenv("SIMULATOR_MODEL_IDENTIFIER"));
+
 	@Override
 	public void updateDisplaySize() {
-		UIApplication.getSharedApplication().setStatusBarHidden(true);
 	}
 
 	@Override
@@ -62,7 +67,7 @@ public class IOSPlatformSupport extends PlatformSupport {
 		int topInset = Gdx.graphics.getSafeInsetTop();
 
 		//older device with no cutout, or landscape (we ignore cutouts in this case)
-		if (topInset == 0){
+		if (iPhoneDuo || topInset == 0){
 			return new RectF();
 		}
 
@@ -93,15 +98,19 @@ public class IOSPlatformSupport extends PlatformSupport {
 	public RectF getSafeInsets(int level) {
 		RectF insets = super.getSafeInsets(INSET_ALL);
 
-		//magic number BS for larger status bar caused by dynamic island
-		boolean hasDynamicIsland = insets.top / Gdx.graphics.getBackBufferScale() >= 51;
-
-		//iOS gives us ALL insets by default, and so we need to filter from there:
-
 		//ignore the home indicator if we're in fullscreen
 		if (!supportsFullScreen() || SPDSettings.fullscreen()){
 			insets.bottom = 0;
 		}
+
+		if (iPhoneDuo){
+			return insets;
+		}
+
+		//magic number BS for larger status bar caused by dynamic island
+		boolean hasDynamicIsland = insets.top / Gdx.graphics.getBackBufferScale() >= 51;
+
+		//iOS gives us ALL insets by default, and so we need to filter from there:
 
 		//only cutouts can be on top/left/right, which are never blocking
 		if (level == INSET_BLK){
@@ -113,7 +122,8 @@ public class IOSPlatformSupport extends PlatformSupport {
 
 		//if we are in landscape, the display cutout is only actually on one side, so cancel the other
 		if (Game.width > Game.height){
-			if (UIApplication.getSharedApplication().getStatusBarOrientation().equals(UIInterfaceOrientation.LandscapeLeft)){
+			UIWindowScene scene = ((IOSApplication) Gdx.app).getUIWindow().getWindowScene();
+			if (scene.getInterfaceOrientation() == UIInterfaceOrientation.LandscapeLeft){
 				insets.left = 0;
 			} else {
 				insets.right = 0;
