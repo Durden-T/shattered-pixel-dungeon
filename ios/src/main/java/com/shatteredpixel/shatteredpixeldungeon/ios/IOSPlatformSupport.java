@@ -37,6 +37,7 @@ import com.watabou.utils.PlatformSupport;
 import com.watabou.utils.RectF;
 
 import org.robovm.apple.audiotoolbox.AudioServices;
+import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.systemconfiguration.SCNetworkReachability;
 import org.robovm.apple.systemconfiguration.SCNetworkReachabilityFlags;
 import org.robovm.apple.uikit.UIInterfaceOrientation;
@@ -104,6 +105,16 @@ public class IOSPlatformSupport extends PlatformSupport {
 		}
 
 		if (iPhoneDuo){
+			if (Game.width > Game.height){
+				UIWindowScene scene = ((IOSApplication) Gdx.app).getUIWindow().getWindowScene();
+				CGRect display = scene.getScreen().getNativeBounds();
+				if (Math.min(display.getWidth(), display.getHeight()) == 1398){
+					// The outer display's larger corners extend 75.6 points along the landscape edges.
+					float cornerInset = 76 * Gdx.graphics.getBackBufferScale();
+					insets.left = Math.max(insets.left, cornerInset);
+					insets.right = Math.max(insets.right, cornerInset);
+				}
+			}
 			return insets;
 		}
 
